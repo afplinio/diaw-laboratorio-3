@@ -1,0 +1,160 @@
+@startuml classes-v1
+title Sistema de Matrículas - Diagrama de Classes (v1)
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "model" {
+
+  abstract class Usuario {
+    - id : String
+    - nome : String
+    - login : String
+    - senha : String
+    + {abstract} getPerfil() : Perfil
+    + validarSenha(senhaInformada : String, encoder : PasswordEncoder) : boolean
+  }
+
+  class Aluno {
+    - matricula : String
+    - cursoId : String
+    + getPerfil() : Perfil
+  }
+
+  class Professor {
+    - departamento : String
+    + getPerfil() : Perfil
+  }
+
+  class Secretaria {
+    - setor : String
+    + getPerfil() : Perfil
+  }
+
+  class Curso {
+    - id : String
+    - nome : String
+    - creditos : int
+    - disciplinaIds : List<String>
+    + adicionarDisciplina(disciplinaId : String) : void
+    + removerDisciplina(disciplinaId : String) : void
+  }
+
+  class Disciplina {
+    - id : String
+    - codigo : String
+    - nome : String
+    - creditos : int
+    - valor : BigDecimal
+  }
+
+  class Curriculo {
+    - id : String
+    - semestre : String
+    - inicioMatriculas : LocalDate
+    - fimMatriculas : LocalDate
+    - status : StatusCurriculo
+    + abrirPeriodoMatriculas() : void
+    + encerrarPeriodoMatriculas() : void
+    + isPeriodoMatriculasAberto(hoje : LocalDate) : boolean
+  }
+
+  class Oferta {
+    + {static} MINIMO_ALUNOS : int = 3
+    + {static} MAXIMO_ALUNOS : int = 60
+    - id : String
+    - curriculoId : String
+    - disciplinaId : String
+    - professorId : String
+    - inscritos : int
+    - status : StatusOferta
+    + isInscricoesAbertas() : boolean
+    + registrarInscricao() : void
+    + removerInscricao() : void
+    + avaliarAtivacao() : void
+  }
+
+  class Matricula {
+    + {static} MAXIMO_OBRIGATORIAS : int = 4
+    + {static} MAXIMO_OPTATIVAS : int = 2
+    - id : String
+    - alunoId : String
+    - ofertaId : String
+    - curriculoId : String
+    - tipo : TipoMatricula
+    - status : StatusMatricula
+    - dataMatricula : LocalDateTime
+    + cancelar() : void
+    + isAtiva() : boolean
+  }
+
+  class NotificacaoCobranca {
+    - id : String
+    - alunoId : String
+    - semestre : String
+    - itens : List<ItemCobranca>
+    - valorTotal : BigDecimal
+    - dataNotificacao : LocalDateTime
+  }
+
+  class ItemCobranca {
+    - disciplinaCodigo : String
+    - disciplinaNome : String
+    - valor : BigDecimal
+  }
+
+  enum Perfil {
+    ALUNO
+    PROFESSOR
+    SECRETARIA
+  }
+
+  enum TipoMatricula {
+    OBRIGATORIA
+    OPTATIVA
+  }
+
+  enum StatusMatricula {
+    ATIVA
+    CANCELADA
+  }
+
+  enum StatusOferta {
+    ABERTA
+    LOTADA
+    ATIVA
+    CANCELADA
+  }
+
+  enum StatusCurriculo {
+    PLANEJADO
+    MATRICULAS_ABERTAS
+    MATRICULAS_ENCERRADAS
+  }
+}
+
+package "service" {
+  interface SistemaCobrancas {
+    + notificar(aluno : Aluno, curriculo : Curriculo, matriculas : List<Matricula>) : NotificacaoCobranca
+  }
+}
+
+Usuario <|-- Aluno
+Usuario <|-- Professor
+Usuario <|-- Secretaria
+Usuario ..> Perfil
+
+Curso "1" o-- "*" Disciplina : é constituído por
+Aluno "*" --> "1" Curso : cursa
+Curriculo "1" *-- "*" Oferta : oferta
+Oferta "*" --> "1" Disciplina
+Oferta "*" --> "1" Professor : lecionada por
+Oferta ..> StatusOferta
+Curriculo ..> StatusCurriculo
+Matricula "*" --> "1" Aluno
+Matricula "0..60" --> "1" Oferta
+Matricula ..> TipoMatricula
+Matricula ..> StatusMatricula
+NotificacaoCobranca "1" *-- "*" ItemCobranca
+NotificacaoCobranca "*" --> "1" Aluno
+SistemaCobrancas ..> NotificacaoCobranca : gera
+@enduml
