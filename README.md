@@ -31,6 +31,7 @@
 ## 📚 Índice
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Funcionalidades Principais](#-funcionalidades-principais)
+- [Histórias de Usuário](#-histórias-de-usuário)
 - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
 - [Autores](#-autores)
 - [Licença](#-licença)
@@ -57,6 +58,84 @@ Uma universidade pretende informatizar seu sistema de matrículas. Hoje a secret
 - 🚦 **Regras de vagas:** inscrições encerradas ao atingir 60 alunos; disciplina ativa somente com 3 ou mais alunos ao final do período.
 - 💳 **Integração com cobranças:** o sistema de cobranças é notificado a cada inscrição do aluno no semestre.
 - 👩‍🏫 **Consulta do professor:** lista de alunos matriculados em cada disciplina que leciona.
+
+---
+
+## 📋 Histórias de Usuário
+
+As histórias abaixo compõem o **Modelo de Análise** do sistema, junto com o Diagrama de Casos de Uso. Cada história segue o formato *"Como &lt;papel&gt;, quero &lt;objetivo&gt;, para &lt;benefício&gt;"* e traz critérios de aceitação.
+
+### 🔐 Todos os usuários
+
+**US01 – Realizar login**
+> Como **usuário do sistema** (aluno, professor ou secretaria), quero **entrar com meu usuário e senha**, para **acessar apenas as funcionalidades do meu perfil**.
+- [ ] O acesso a qualquer tela ou endpoint exige autenticação.
+- [ ] A senha é validada e nunca é armazenada em texto puro.
+- [ ] Usuário ou senha inválidos exibem mensagem de erro, sem revelar qual dos dois está errado.
+- [ ] Após o login, o usuário é direcionado para a área do seu perfil.
+
+**US02 – Sair do sistema**
+> Como **usuário autenticado**, quero **encerrar minha sessão**, para **impedir que outra pessoa use minha conta**.
+- [ ] Ao sair, as credenciais da sessão são descartadas e a tela de login é exibida.
+
+### 🏫 Secretaria
+
+**US03 – Manter cursos**
+> Como **secretaria**, quero **cadastrar, editar, listar e remover cursos** com nome, número de créditos e disciplinas, para **manter a estrutura acadêmica atualizada**.
+- [ ] Todo curso tem nome e número de créditos (maior que zero).
+- [ ] Um curso é constituído por diversas disciplinas.
+
+**US04 – Manter disciplinas**
+> Como **secretaria**, quero **cadastrar, editar, listar e remover disciplinas**, para **definir o que pode ser ofertado nos semestres**.
+- [ ] Cada disciplina tem código, nome, créditos e valor (usado na cobrança).
+
+**US05 – Manter professores**
+> Como **secretaria**, quero **cadastrar, editar, listar e remover professores** com login e senha, para **que eles acessem o sistema**.
+
+**US06 – Manter alunos**
+> Como **secretaria**, quero **cadastrar, editar, listar e remover alunos** com matrícula, curso, login e senha, para **que eles possam se matricular**.
+- [ ] O login é único entre todos os usuários do sistema.
+
+**US07 – Gerar currículo do semestre**
+> Como **secretaria**, quero **gerar o currículo de um semestre**, ofertando disciplinas e indicando o professor de cada uma, para **disponibilizá-las para matrícula**.
+- [ ] Um currículo pertence a um único semestre (ex.: `2027/1`).
+- [ ] Cada oferta liga uma disciplina a um professor.
+
+**US08 – Abrir e encerrar o período de matrículas**
+> Como **secretaria**, quero **definir as datas e abrir/encerrar o período de matrículas**, para **controlar quando os alunos podem se matricular**.
+- [ ] Fora do período, matrículas e cancelamentos são bloqueados.
+- [ ] Ao encerrar o período, toda disciplina com **3 ou mais** alunos fica **ativa** (vai ocorrer no semestre seguinte).
+- [ ] As disciplinas com **menos de 3** alunos são **canceladas**, e as matrículas nelas também.
+
+**US09 – Consultar notificações de cobrança**
+> Como **secretaria**, quero **visualizar as notificações enviadas ao sistema de cobranças**, para **conferir o que será cobrado de cada aluno**.
+
+### 🧑‍🎓 Aluno
+
+**US10 – Consultar disciplinas ofertadas**
+> Como **aluno**, quero **ver as disciplinas ofertadas no semestre**, com professor, créditos e vagas, para **escolher onde me matricular**.
+
+**US11 – Matricular-se em disciplinas**
+> Como **aluno**, quero **me matricular em até 4 disciplinas obrigatórias (1ª opção) e 2 optativas (alternativas)**, para **montar meu semestre**.
+- [ ] Só é possível se matricular durante o período de matrículas.
+- [ ] Não é possível ultrapassar 4 obrigatórias nem 2 optativas.
+- [ ] Não é possível se matricular duas vezes na mesma disciplina.
+- [ ] Uma disciplina aceita no máximo **60** alunos; ao atingir esse número, as inscrições nela são **encerradas**.
+
+**US12 – Cancelar matrícula**
+> Como **aluno**, quero **cancelar uma matrícula feita anteriormente**, para **ajustar minhas escolhas**.
+- [ ] Só é possível cancelar durante o período de matrículas.
+- [ ] O cancelamento libera a vaga e reabre as inscrições se a disciplina estava lotada.
+
+**US13 – Notificar o sistema de cobranças**
+> Como **aluno**, quero **que o sistema de cobranças seja notificado das minhas inscrições**, para **ser cobrado corretamente pelas disciplinas do semestre**.
+- [ ] Após cada inscrição (ou cancelamento) o sistema de cobranças recebe as disciplinas e o valor total do aluno no semestre.
+
+### 👩‍🏫 Professor
+
+**US14 – Consultar alunos matriculados**
+> Como **professor**, quero **ver quais alunos estão matriculados em cada disciplina que leciono**, para **me planejar para o semestre**.
+- [ ] O professor vê apenas as suas disciplinas.
 
 ---
 
