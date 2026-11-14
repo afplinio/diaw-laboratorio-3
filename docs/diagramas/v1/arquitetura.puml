@@ -1,0 +1,38 @@
+@startuml arquitetura-v1
+title Sistema de Matrículas - Diagrama de Arquitetura (v1)
+skinparam componentStyle uml2
+
+actor "Aluno / Professor / Secretaria" as User
+
+node "Navegador" {
+  component "Front-end\nReact + Vite (SPA)" as SPA {
+    [Páginas] as Pages
+    [AuthContext] as Auth
+    [Cliente HTTP (api.js)] as Api
+  }
+}
+
+node "Servidor de Aplicação" {
+  component "Back-end\nSpring Boot 4 (Java 25)" as API {
+    [Controllers REST] as Ctrl
+    [Spring Security\n(login + JWT)] as Sec
+    [Services\n(regras de negócio)] as Svc
+    [Model\n(classes de domínio)] as Model
+    [Repositories\n(Spring Data MongoDB)] as Repo
+  }
+}
+
+database "MongoDB Atlas" as Mongo
+component "Sistema de Cobranças" as Cob <<externo>>
+
+User --> Pages
+Pages --> Auth
+Pages --> Api
+Api --> Sec : HTTPS / JSON\nAuthorization: Bearer
+Sec --> Ctrl
+Ctrl --> Svc
+Svc --> Model
+Svc --> Repo
+Repo --> Mongo
+Svc --> Cob : notificação de cobrança
+@enduml
