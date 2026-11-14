@@ -1,0 +1,51 @@
+@startuml casos-de-uso-v1
+title Sistema de Matrículas - Diagrama de Casos de Uso (v1)
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Usuário" as Usuario
+actor "Aluno" as Aluno
+actor "Professor" as Professor
+actor "Secretaria" as Secretaria
+actor "Sistema de Cobranças" as Cobrancas <<sistema>>
+
+Aluno -up-|> Usuario
+Professor -up-|> Usuario
+Secretaria -up-|> Usuario
+
+rectangle "Sistema de Matrículas" {
+  usecase "Realizar login" as UC01
+
+  usecase "Manter cursos" as UC03
+  usecase "Manter disciplinas" as UC04
+  usecase "Manter professores" as UC05
+  usecase "Manter alunos" as UC06
+  usecase "Gerar currículo do semestre" as UC07
+  usecase "Gerenciar período de matrículas" as UC08
+
+  usecase "Consultar disciplinas ofertadas" as UC10
+  usecase "Matricular-se em disciplina" as UC11
+  usecase "Cancelar matrícula" as UC12
+  usecase "Notificar sistema de cobranças" as UC13
+
+  usecase "Consultar alunos da disciplina" as UC14
+}
+
+Usuario --> UC01
+
+Secretaria --> UC03
+Secretaria --> UC04
+Secretaria --> UC05
+Secretaria --> UC06
+Secretaria --> UC07
+Secretaria --> UC08
+
+Aluno --> UC10
+Aluno --> UC11
+Aluno --> UC12
+UC11 ..> UC13 : <<include>>
+UC13 --> Cobrancas
+
+Professor --> UC14
+@enduml
