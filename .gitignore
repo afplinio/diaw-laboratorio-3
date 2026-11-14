@@ -1,0 +1,21 @@
+# Sistema operacional / IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Variáveis de ambiente (nunca versionar segredos)
+.env
+.env.*
+!.env.example
+
+# Back-end (Maven / Java)
+backend/target/
+*.class
+*.log
+
+# Front-end (Node / Vite)
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
