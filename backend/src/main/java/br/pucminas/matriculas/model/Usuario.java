@@ -28,7 +28,7 @@ public abstract class Usuario {
 
     /** Verifica se a senha informada no login corresponde ao hash armazenado. */
     public boolean validarSenha(String senhaInformada, PasswordEncoder encoder) {
-        throw new UnsupportedOperationException("Não implementado");
+        return senha != null && senhaInformada != null && encoder.matches(senhaInformada, senha);
     }
 
     public String getId() {

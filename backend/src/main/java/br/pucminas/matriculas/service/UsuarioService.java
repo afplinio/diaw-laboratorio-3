@@ -26,11 +26,15 @@ public class UsuarioService {
 
     /** Procura o usuário pelo login em todos os perfis. */
     public Optional<Usuario> buscarPorLogin(String login) {
-        throw new UnsupportedOperationException("Não implementado");
+        return alunoRepository.findByLogin(login).<Usuario>map(u -> u)
+                .or(() -> professorRepository.findByLogin(login))
+                .or(() -> secretariaRepository.findByLogin(login));
     }
 
     /** Indica se o login já é usado por algum usuário do sistema. */
     public boolean loginEmUso(String login) {
-        throw new UnsupportedOperationException("Não implementado");
+        return alunoRepository.existsByLogin(login)
+                || professorRepository.existsByLogin(login)
+                || secretariaRepository.existsByLogin(login);
     }
 }
