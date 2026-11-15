@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import br.pucminas.matriculas.exception.RecursoNaoEncontradoException;
 import br.pucminas.matriculas.exception.RegraNegocioException;
 import br.pucminas.matriculas.model.Aluno;
+import br.pucminas.matriculas.model.Matricula;
 import br.pucminas.matriculas.model.Oferta;
 import br.pucminas.matriculas.model.Professor;
+import br.pucminas.matriculas.model.StatusMatricula;
 import br.pucminas.matriculas.repository.AlunoRepository;
 import br.pucminas.matriculas.repository.MatriculaRepository;
 import br.pucminas.matriculas.repository.OfertaRepository;
@@ -83,11 +85,18 @@ public class ProfessorService {
 
     /** Disciplinas ofertadas que o professor leciona. */
     public List<Oferta> listarOfertas(String professorId) {
-        throw new UnsupportedOperationException("Não implementado");
+        return ofertaRepository.findByProfessorId(professorId);
     }
 
     /** Alunos matriculados em uma disciplina lecionada pelo professor. */
     public List<Aluno> listarAlunosMatriculados(String professorId, String ofertaId) {
-        throw new UnsupportedOperationException("Não implementado");
+        Oferta oferta = ofertaRepository.findById(ofertaId)
+                .filter(o -> o.getProfessorId().equals(professorId))
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Disciplina do professor", ofertaId));
+        List<String> alunoIds = matriculaRepository.findByOfertaIdAndStatus(oferta.getId(), StatusMatricula.ATIVA)
+                .stream().map(Matricula::getAlunoId).toList();
+        return alunoRepository.findAllById(alunoIds).stream()
+                .sorted(Comparator.comparing(Aluno::getNome))
+                .toList();
     }
 }
