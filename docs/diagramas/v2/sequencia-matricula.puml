@@ -1,0 +1,35 @@
+@startuml sequencia-matricula
+title Sistema de Matrículas - Sequência: Aluno se matricula em uma disciplina
+autonumber
+actor Aluno
+participant "MatriculaPage\n(React)" as UI
+participant "AreaAlunoController" as C
+participant "MatriculaService" as S
+participant "Curriculo" as Cur
+participant "Oferta" as O
+database "MongoDB Atlas" as DB
+participant "SistemaCobrancas" as Cob
+
+Aluno -> UI : clica "Obrigatória" ou "Optativa"
+UI -> C : POST /api/aluno/matriculas\n{ofertaId, tipo} + Bearer JWT
+C -> S : matricular(alunoId, ofertaId, tipo)
+S -> DB : busca aluno, oferta e currículo
+S -> Cur : isPeriodoMatriculasAberto(hoje)
+alt fora do período
+  S --> C : RegraNegocioException
+  C --> UI : 422 "Fora do período de matrículas"
+end
+S -> DB : já matriculado? / conta matrículas ativas do tipo
+alt duplicada ou limite (4 obrigatórias / 2 optativas)
+  S --> C : RegraNegocioException
+  C --> UI : 422 com a mensagem da regra
+end
+S -> O : registrarInscricao()
+note right of O : inscritos++\nao chegar em 60 → LOTADA\n(inscrições encerradas)
+S -> DB : salva oferta (@Version) e matrícula
+S -> Cob : notificar(aluno, curriculo, matrículas ativas, INSCRICAO)
+Cob -> DB : salva NotificacaoCobranca (itens + valor total)
+S --> C : Matricula
+C --> UI : 201 MatriculaResponse
+UI --> Aluno : "Matrícula realizada. O sistema de cobranças foi notificado."
+@enduml

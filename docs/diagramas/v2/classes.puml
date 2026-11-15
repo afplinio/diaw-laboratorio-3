@@ -1,0 +1,212 @@
+@startuml classes-v2
+title Sistema de Matrículas - Diagrama de Classes (v2 - corrigido)
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "model" {
+
+  abstract class Usuario {
+    - id : String
+    - nome : String
+    - login : String
+    - senha : String
+    + {abstract} getPerfil() : Perfil
+    + validarSenha(senhaInformada : String, encoder : PasswordEncoder) : boolean
+  }
+
+  class Aluno <<Document alunos>> {
+    - matricula : String
+    - cursoId : String
+    + getPerfil() : Perfil
+  }
+
+  class Professor <<Document professores>> {
+    - departamento : String
+    + getPerfil() : Perfil
+  }
+
+  class Secretaria <<Document secretarias>> {
+    - setor : String
+    + getPerfil() : Perfil
+  }
+
+  class Curso <<Document cursos>> {
+    - id : String
+    - nome : String
+    - creditos : int
+    - disciplinaIds : List<String>
+    + adicionarDisciplina(disciplinaId : String) : void
+    + removerDisciplina(disciplinaId : String) : void
+  }
+
+  class Disciplina <<Document disciplinas>> {
+    - id : String
+    - codigo : String
+    - nome : String
+    - creditos : int
+    - valor : BigDecimal
+  }
+
+  class Curriculo <<Document curriculos>> {
+    - id : String
+    - semestre : String
+    - inicioMatriculas : LocalDate
+    - fimMatriculas : LocalDate
+    - status : StatusCurriculo
+    + abrirPeriodoMatriculas() : void
+    + encerrarPeriodoMatriculas() : void
+    + isPeriodoMatriculasAberto(hoje : LocalDate) : boolean
+  }
+
+  class Oferta <<Document ofertas>> {
+    + {static} MINIMO_ALUNOS : int = 3
+    + {static} MAXIMO_ALUNOS : int = 60
+    - id : String
+    - curriculoId : String
+    - disciplinaId : String
+    - professorId : String
+    - inscritos : int
+    - status : StatusOferta
+    - versao : Long
+    + isInscricoesAbertas() : boolean
+    + registrarInscricao() : void
+    + removerInscricao() : void
+    + avaliarAtivacao() : void
+    + getVagasDisponiveis() : int
+  }
+
+  class Matricula <<Document matriculas>> {
+    + {static} MAXIMO_OBRIGATORIAS : int = 4
+    + {static} MAXIMO_OPTATIVAS : int = 2
+    - id : String
+    - alunoId : String
+    - ofertaId : String
+    - curriculoId : String
+    - tipo : TipoMatricula
+    - status : StatusMatricula
+    - dataMatricula : LocalDateTime
+    - dataCancelamento : LocalDateTime
+    + cancelar() : void
+    + cancelarPorDisciplinaCancelada() : void
+    + isAtiva() : boolean
+  }
+
+  class NotificacaoCobranca <<Document notificacoes_cobranca>> {
+    - id : String
+    - alunoId : String
+    - alunoNome : String
+    - alunoMatricula : String
+    - semestre : String
+    - motivo : MotivoNotificacao
+    - itens : List<ItemCobranca>
+    - valorTotal : BigDecimal
+    - dataNotificacao : LocalDateTime
+  }
+
+  class ItemCobranca <<record>> {
+    - disciplinaCodigo : String
+    - disciplinaNome : String
+    - valor : BigDecimal
+  }
+
+  enum Perfil {
+    ALUNO
+    PROFESSOR
+    SECRETARIA
+  }
+
+  enum TipoMatricula {
+    OBRIGATORIA
+    OPTATIVA
+  }
+
+  enum StatusMatricula {
+    ATIVA
+    CANCELADA
+    DISCIPLINA_CANCELADA
+  }
+
+  enum StatusOferta {
+    ABERTA
+    LOTADA
+    ATIVA
+    CANCELADA
+  }
+
+  enum StatusCurriculo {
+    PLANEJADO
+    MATRICULAS_ABERTAS
+    MATRICULAS_ENCERRADAS
+  }
+
+  enum MotivoNotificacao {
+    INSCRICAO
+    CANCELAMENTO
+    ENCERRAMENTO_PERIODO
+  }
+}
+
+package "service" {
+  interface SistemaCobrancas {
+    + notificar(aluno : Aluno, curriculo : Curriculo, matriculas : List<Matricula>, motivo : MotivoNotificacao) : NotificacaoCobranca
+  }
+
+  class SistemaCobrancasService {
+    + notificar(...) : NotificacaoCobranca
+    + listarNotificacoes() : List<NotificacaoCobranca>
+  }
+
+  class MatriculaService {
+    + matricular(alunoId : String, ofertaId : String, tipo : TipoMatricula) : Matricula
+    + cancelar(alunoId : String, matriculaId : String) : Matricula
+    + listarDoAluno(alunoId : String) : List<Matricula>
+  }
+
+  class CurriculoService {
+    + criar(curriculo : Curriculo) : Curriculo
+    + adicionarOferta(curriculoId : String, disciplinaId : String, professorId : String) : Oferta
+    + abrirPeriodoMatriculas(curriculoId : String) : Curriculo
+    + encerrarPeriodoMatriculas(curriculoId : String) : Curriculo
+  }
+
+  class AuthService {
+    + login(login : String, senha : String) : LoginResponse
+  }
+}
+
+package "exception" {
+  class RegraNegocioException
+}
+
+Usuario <|-- Aluno
+Usuario <|-- Professor
+Usuario <|-- Secretaria
+Usuario ..> Perfil
+
+Curso "1" o-- "*" Disciplina : é constituído por
+Aluno "*" --> "1" Curso : cursa
+Curriculo "1" *-- "*" Oferta : oferta
+Oferta "*" --> "1" Disciplina
+Oferta "*" --> "1" Professor : lecionada por
+Oferta ..> StatusOferta
+Curriculo ..> StatusCurriculo
+Matricula "*" --> "1" Aluno
+Matricula "0..60" --> "1" Oferta
+Matricula ..> TipoMatricula
+Matricula ..> StatusMatricula
+NotificacaoCobranca "1" *-- "*" ItemCobranca
+NotificacaoCobranca "*" --> "1" Aluno
+NotificacaoCobranca ..> MotivoNotificacao
+
+SistemaCobrancas <|.. SistemaCobrancasService
+SistemaCobrancasService ..> NotificacaoCobranca : gera
+MatriculaService --> SistemaCobrancas
+CurriculoService --> SistemaCobrancas
+MatriculaService ..> Matricula
+MatriculaService ..> Oferta
+CurriculoService ..> Curriculo
+AuthService ..> Usuario
+Oferta ..> RegraNegocioException
+Curriculo ..> RegraNegocioException
+Matricula ..> RegraNegocioException
+@enduml

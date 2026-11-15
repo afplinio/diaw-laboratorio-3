@@ -1,0 +1,72 @@
+@startuml casos-de-uso-v2
+title Sistema de Matrículas - Diagrama de Casos de Uso (v2 - corrigido)
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+actor "Usuário" as Usuario
+actor "Aluno" as Aluno
+actor "Professor" as Professor
+actor "Secretaria" as Secretaria
+actor "Sistema de Cobranças" as Cobrancas <<sistema>>
+
+Aluno -up-|> Usuario
+Professor -up-|> Usuario
+Secretaria -up-|> Usuario
+
+rectangle "Sistema de Matrículas" {
+  usecase "Realizar login" as UC01
+  usecase "Validar senha" as UC01a
+  usecase "Sair do sistema" as UC02
+
+  usecase "Manter cursos" as UC03
+  usecase "Manter disciplinas" as UC04
+  usecase "Manter professores" as UC05
+  usecase "Manter alunos" as UC06
+  usecase "Gerar currículo do semestre" as UC07
+  usecase "Ofertar disciplina no currículo" as UC07a
+  usecase "Abrir período de matrículas" as UC08a
+  usecase "Encerrar período de matrículas" as UC08b
+  usecase "Avaliar ativação das disciplinas\n(mín. 3 alunos)" as UC08c
+  usecase "Consultar notificações de cobrança" as UC09
+
+  usecase "Consultar disciplinas ofertadas" as UC10
+  usecase "Matricular-se em disciplina\n(4 obrigatórias + 2 optativas)" as UC11
+  usecase "Encerrar inscrições da disciplina\n(60 alunos)" as UC11a
+  usecase "Cancelar matrícula" as UC12
+  usecase "Notificar sistema de cobranças" as UC13
+
+  usecase "Consultar alunos da disciplina" as UC14
+}
+
+Usuario --> UC01
+Usuario --> UC02
+UC01 ..> UC01a : <<include>>
+
+Secretaria --> UC03
+Secretaria --> UC04
+Secretaria --> UC05
+Secretaria --> UC06
+Secretaria --> UC07
+UC07 <.. UC07a : <<extend>>
+Secretaria --> UC08a
+Secretaria --> UC08b
+UC08b ..> UC08c : <<include>>
+UC08c ..> UC13 : <<include>>
+Secretaria --> UC09
+
+Aluno --> UC10
+Aluno --> UC11
+Aluno --> UC12
+UC11 <.. UC11a : <<extend>>
+UC11 ..> UC13 : <<include>>
+UC12 ..> UC13 : <<include>>
+UC13 --> Cobrancas
+
+Professor --> UC14
+
+note right of UC11
+  Somente durante o período de matrículas.
+  Não permite matrícula duplicada.
+end note
+@enduml

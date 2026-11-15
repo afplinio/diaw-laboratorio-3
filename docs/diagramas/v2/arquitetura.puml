@@ -1,0 +1,50 @@
+@startuml arquitetura-v2
+title Sistema de Matrículas - Diagrama de Arquitetura (v2 - corrigido)
+skinparam componentStyle uml2
+
+actor "Aluno / Professor / Secretaria" as User
+
+node "Navegador" {
+  component "Front-end React 19 + Vite (SPA)" as SPA {
+    [pages/ (secretaria, aluno, professor, login)] as Pages
+    [components/ (Layout, ProtectedRoute, StatusBadge)] as Comps
+    [contexts/AuthContext + hooks/useAuth] as Auth
+    [services/api.js (fetch + Bearer token)] as Api
+  }
+}
+
+node "Servidor de Aplicação (JDK 25)" {
+  component "Back-end Spring Boot 4.0 (Maven)" as API {
+    [security/\nSecurityConfig (JWT HS256, BCrypt, CORS)\nTokenService] as Sec
+    [controller/\nAuth, Curso, Disciplina, Aluno, Professor,\nCurriculo, Cobranca, AreaAluno, AreaProfessor] as Ctrl
+    [dto/\nrequests e responses (records)] as Dto
+    [service/\nMatriculaService, CurriculoService,\nAuthService, SistemaCobrancasService, ...] as Svc
+    [model/\nclasses de domínio e regras] as Model
+    [repository/\nSpring Data MongoDB] as Repo
+    [exception/\nGlobalExceptionHandler] as Exc
+    [config/\nDataInitializer] as Cfg
+  }
+}
+
+database "MongoDB Atlas" as Mongo {
+  folder "coleções" {
+    [alunos, professores, secretarias,\ncursos, disciplinas, curriculos,\nofertas, matriculas, notificacoes_cobranca] as Colls
+  }
+}
+
+User --> Pages
+Pages --> Comps
+Pages --> Auth
+Pages --> Api
+Auth --> Api
+Api --> Sec : HTTPS / JSON\nPOST /api/auth/login → token JWT\nAuthorization: Bearer <token>
+Sec --> Ctrl : perfil → ROLE_* (@PreAuthorize)
+Ctrl --> Dto
+Ctrl --> Svc
+Ctrl ..> Exc : erros → JSON (400/401/403/404/409/422)
+Svc --> Model
+Svc --> Repo
+Cfg --> Repo : dados iniciais
+Repo --> Colls : MONGODB_URI
+Svc --> [SistemaCobrancas\n(interface)] : notificar(aluno, semestre, disciplinas)
+@enduml
