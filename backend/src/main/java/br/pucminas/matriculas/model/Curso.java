@@ -25,11 +25,13 @@ public class Curso {
     }
 
     public void adicionarDisciplina(String disciplinaId) {
-        throw new UnsupportedOperationException("Não implementado");
+        if (disciplinaId != null && !disciplinaIds.contains(disciplinaId)) {
+            disciplinaIds.add(disciplinaId);
+        }
     }
 
     public void removerDisciplina(String disciplinaId) {
-        throw new UnsupportedOperationException("Não implementado");
+        disciplinaIds.remove(disciplinaId);
     }
 
     public String getId() {

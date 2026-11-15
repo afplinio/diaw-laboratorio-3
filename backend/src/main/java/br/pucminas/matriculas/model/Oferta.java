@@ -3,6 +3,8 @@ package br.pucminas.matriculas.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import br.pucminas.matriculas.exception.RegraNegocioException;
+
 /**
  * Disciplina ofertada em um currículo semestral, lecionada por um professor.
  * Aceita no máximo 60 alunos e só fica ativa se tiver pelo menos 3 ao final do período.
@@ -31,19 +33,35 @@ public class Oferta {
     }
 
     public boolean isInscricoesAbertas() {
-        throw new UnsupportedOperationException("Não implementado");
+        return status == StatusOferta.ABERTA && inscritos < MAXIMO_ALUNOS;
     }
 
     public void registrarInscricao() {
-        throw new UnsupportedOperationException("Não implementado");
+        if (!isInscricoesAbertas()) {
+            throw new RegraNegocioException("As inscrições para esta disciplina estão encerradas");
+        }
+        inscritos++;
+        if (inscritos >= MAXIMO_ALUNOS) {
+            status = StatusOferta.LOTADA;
+        }
     }
 
     public void removerInscricao() {
-        throw new UnsupportedOperationException("Não implementado");
+        if (inscritos > 0) {
+            inscritos--;
+        }
+        if (status == StatusOferta.LOTADA && inscritos < MAXIMO_ALUNOS) {
+            status = StatusOferta.ABERTA;
+        }
     }
 
+    /** Ao fim do período: ativa a disciplina com 3 ou mais alunos; caso contrário, cancela. */
     public void avaliarAtivacao() {
-        throw new UnsupportedOperationException("Não implementado");
+        status = inscritos >= MINIMO_ALUNOS ? StatusOferta.ATIVA : StatusOferta.CANCELADA;
+    }
+
+    public int getVagasDisponiveis() {
+        return Math.max(0, MAXIMO_ALUNOS - inscritos);
     }
 
     public String getId() {

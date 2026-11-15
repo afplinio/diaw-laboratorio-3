@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import br.pucminas.matriculas.exception.RegraNegocioException;
+
 /**
  * Currículo de um semestre, gerado pela secretaria. Define o período de matrículas
  * durante o qual os alunos podem se matricular ou cancelar matrículas.
@@ -30,15 +32,26 @@ public class Curriculo {
     }
 
     public void abrirPeriodoMatriculas() {
-        throw new UnsupportedOperationException("Não implementado");
+        if (status == StatusCurriculo.MATRICULAS_ENCERRADAS) {
+            throw new RegraNegocioException("O período de matrículas do semestre " + semestre + " já foi encerrado");
+        }
+        if (inicioMatriculas == null || fimMatriculas == null || fimMatriculas.isBefore(inicioMatriculas)) {
+            throw new RegraNegocioException("Defina datas válidas para o período de matrículas");
+        }
+        status = StatusCurriculo.MATRICULAS_ABERTAS;
     }
 
     public void encerrarPeriodoMatriculas() {
-        throw new UnsupportedOperationException("Não implementado");
+        if (status != StatusCurriculo.MATRICULAS_ABERTAS) {
+            throw new RegraNegocioException("O período de matrículas não está aberto");
+        }
+        status = StatusCurriculo.MATRICULAS_ENCERRADAS;
     }
 
     public boolean isPeriodoMatriculasAberto(LocalDate hoje) {
-        throw new UnsupportedOperationException("Não implementado");
+        return status == StatusCurriculo.MATRICULAS_ABERTAS
+                && !hoje.isBefore(inicioMatriculas)
+                && !hoje.isAfter(fimMatriculas);
     }
 
     public String getId() {

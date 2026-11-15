@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import br.pucminas.matriculas.exception.RegraNegocioException;
+
 /** Inscrição de um aluno em uma disciplina ofertada no semestre. */
 @Document(collection = "matriculas")
 public class Matricula {
@@ -20,6 +22,7 @@ public class Matricula {
     private TipoMatricula tipo;
     private StatusMatricula status = StatusMatricula.ATIVA;
     private LocalDateTime dataMatricula;
+    private LocalDateTime dataCancelamento;
 
     public Matricula() {
     }
@@ -32,12 +35,25 @@ public class Matricula {
         this.dataMatricula = LocalDateTime.now();
     }
 
+    /** Cancelamento solicitado pelo aluno durante o período de matrículas. */
     public void cancelar() {
-        throw new UnsupportedOperationException("Não implementado");
+        if (!isAtiva()) {
+            throw new RegraNegocioException("Esta matrícula não está ativa");
+        }
+        status = StatusMatricula.CANCELADA;
+        dataCancelamento = LocalDateTime.now();
+    }
+
+    /** Cancelamento automático porque a disciplina não atingiu o mínimo de alunos. */
+    public void cancelarPorDisciplinaCancelada() {
+        if (isAtiva()) {
+            status = StatusMatricula.DISCIPLINA_CANCELADA;
+            dataCancelamento = LocalDateTime.now();
+        }
     }
 
     public boolean isAtiva() {
-        throw new UnsupportedOperationException("Não implementado");
+        return status == StatusMatricula.ATIVA;
     }
 
     public String getId() {
@@ -94,5 +110,13 @@ public class Matricula {
 
     public void setDataMatricula(LocalDateTime dataMatricula) {
         this.dataMatricula = dataMatricula;
+    }
+
+    public LocalDateTime getDataCancelamento() {
+        return dataCancelamento;
+    }
+
+    public void setDataCancelamento(LocalDateTime dataCancelamento) {
+        this.dataCancelamento = dataCancelamento;
     }
 }
