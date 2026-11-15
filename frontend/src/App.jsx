@@ -6,6 +6,8 @@ import { useAuth } from './hooks/useAuth.js'
 import { PAGINA_INICIAL } from './navegacao.js'
 import BoasVindasPage from './pages/BoasVindasPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import CursosPage from './pages/secretaria/CursosPage.jsx'
+import DisciplinasPage from './pages/secretaria/DisciplinasPage.jsx'
 
 /** Redireciona o usuário para a área do seu perfil. */
 function Inicio() {
@@ -30,6 +32,8 @@ export default function App() {
           >
             <Route index element={<Inicio />} />
             <Route path="secretaria" element={somente('SECRETARIA', <BoasVindasPage />)} />
+            <Route path="secretaria/cursos" element={somente('SECRETARIA', <CursosPage />)} />
+            <Route path="secretaria/disciplinas" element={somente('SECRETARIA', <DisciplinasPage />)} />
             <Route path="aluno" element={somente('ALUNO', <BoasVindasPage />)} />
             <Route path="professor" element={somente('PROFESSOR', <BoasVindasPage />)} />
           </Route>

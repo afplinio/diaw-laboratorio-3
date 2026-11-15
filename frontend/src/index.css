@@ -449,3 +449,31 @@ td.acoes {
     padding: 1rem;
   }
 }
+
+/* Lista de seleção (checkboxes) */
+.checklist {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  margin: 0;
+}
+
+.checklist legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0 0.3rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+}
+
+.check input {
+  width: auto;
+}

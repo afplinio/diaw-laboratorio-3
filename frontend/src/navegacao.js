@@ -1,6 +1,9 @@
 /** Itens do menu lateral por perfil de usuário. */
 export const MENU = {
-  SECRETARIA: [],
+  SECRETARIA: [
+    { para: '/secretaria/cursos', rotulo: 'Cursos' },
+    { para: '/secretaria/disciplinas', rotulo: 'Disciplinas' },
+  ],
   ALUNO: [],
   PROFESSOR: [],
 }
