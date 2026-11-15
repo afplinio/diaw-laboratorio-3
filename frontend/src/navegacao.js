@@ -8,7 +8,7 @@ export const MENU = {
     { para: '/secretaria/alunos', rotulo: 'Alunos' },
     { para: '/secretaria/cobrancas', rotulo: 'Cobranças' },
   ],
-  ALUNO: [],
+  ALUNO: [{ para: '/aluno', rotulo: 'Minhas matrículas', exato: true }],
   PROFESSOR: [],
 }
 
