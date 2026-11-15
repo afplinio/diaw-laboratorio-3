@@ -1,0 +1,13 @@
+package br.pucminas.matriculas.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+/** Dados do aluno. A senha é obrigatória no cadastro e opcional na edição. */
+public record AlunoRequest(
+        @NotBlank(message = "Informe o nome") String nome,
+        @NotBlank(message = "Informe o login") String login,
+        @Size(min = 6, message = "A senha deve ter pelo menos 6 caracteres") String senha,
+        @NotBlank(message = "Informe o número de matrícula") String matricula,
+        @NotBlank(message = "Informe o curso") String cursoId) {
+}

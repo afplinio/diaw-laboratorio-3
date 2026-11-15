@@ -1,10 +1,13 @@
 package br.pucminas.matriculas.service;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.pucminas.matriculas.exception.RecursoNaoEncontradoException;
+import br.pucminas.matriculas.exception.RegraNegocioException;
 import br.pucminas.matriculas.model.Aluno;
 import br.pucminas.matriculas.model.Oferta;
 import br.pucminas.matriculas.model.Professor;
@@ -36,23 +39,46 @@ public class ProfessorService {
     }
 
     public List<Professor> listar() {
-        throw new UnsupportedOperationException("Não implementado");
+        return professorRepository.findAll().stream().sorted(Comparator.comparing(Professor::getNome)).toList();
     }
 
     public Professor buscar(String id) {
-        throw new UnsupportedOperationException("Não implementado");
+        return professorRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor", id));
     }
 
     public Professor criar(Professor professor, String senha) {
-        throw new UnsupportedOperationException("Não implementado");
+        if (senha == null || senha.isBlank()) {
+            throw new RegraNegocioException("Informe a senha do professor");
+        }
+        if (usuarioService.loginEmUso(professor.getLogin())) {
+            throw new RegraNegocioException("O login " + professor.getLogin() + " já está em uso");
+        }
+        professor.setId(null);
+        professor.setSenha(passwordEncoder.encode(senha));
+        return professorRepository.save(professor);
     }
 
     public Professor atualizar(String id, Professor dados, String novaSenha) {
-        throw new UnsupportedOperationException("Não implementado");
+        Professor professor = buscar(id);
+        if (!professor.getLogin().equals(dados.getLogin()) && usuarioService.loginEmUso(dados.getLogin())) {
+            throw new RegraNegocioException("O login " + dados.getLogin() + " já está em uso");
+        }
+        professor.setNome(dados.getNome());
+        professor.setLogin(dados.getLogin());
+        professor.setDepartamento(dados.getDepartamento());
+        if (novaSenha != null && !novaSenha.isBlank()) {
+            professor.setSenha(passwordEncoder.encode(novaSenha));
+        }
+        return professorRepository.save(professor);
     }
 
     public void remover(String id) {
-        throw new UnsupportedOperationException("Não implementado");
+        Professor professor = buscar(id);
+        if (ofertaRepository.existsByProfessorId(id)) {
+            throw new RegraNegocioException("O professor leciona disciplinas ofertadas e não pode ser removido");
+        }
+        professorRepository.delete(professor);
     }
 
     /** Disciplinas ofertadas que o professor leciona. */
