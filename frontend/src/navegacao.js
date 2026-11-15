@@ -9,7 +9,7 @@ export const MENU = {
     { para: '/secretaria/cobrancas', rotulo: 'Cobranças' },
   ],
   ALUNO: [{ para: '/aluno', rotulo: 'Minhas matrículas', exato: true }],
-  PROFESSOR: [],
+  PROFESSOR: [{ para: '/professor', rotulo: 'Minhas disciplinas', exato: true }],
 }
 
 export const PAGINA_INICIAL = {

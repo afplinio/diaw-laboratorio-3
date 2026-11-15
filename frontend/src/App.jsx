@@ -4,9 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { useAuth } from './hooks/useAuth.js'
 import { PAGINA_INICIAL } from './navegacao.js'
-import BoasVindasPage from './pages/BoasVindasPage.jsx'
 import MatriculaPage from './pages/aluno/MatriculaPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import DisciplinasProfessorPage from './pages/professor/DisciplinasProfessorPage.jsx'
 import AlunosPage from './pages/secretaria/AlunosPage.jsx'
 import CobrancasPage from './pages/secretaria/CobrancasPage.jsx'
 import CurriculosPage from './pages/secretaria/CurriculosPage.jsx'
@@ -44,7 +44,7 @@ export default function App() {
             <Route path="secretaria/alunos" element={somente('SECRETARIA', <AlunosPage />)} />
             <Route path="secretaria/cobrancas" element={somente('SECRETARIA', <CobrancasPage />)} />
             <Route path="aluno" element={somente('ALUNO', <MatriculaPage />)} />
-            <Route path="professor" element={somente('PROFESSOR', <BoasVindasPage />)} />
+            <Route path="professor" element={somente('PROFESSOR', <DisciplinasProfessorPage />)} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
