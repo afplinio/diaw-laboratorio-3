@@ -1,23 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { useAuth } from './hooks/useAuth.js'
+import { PAGINA_INICIAL } from './navegacao.js'
+import BoasVindasPage from './pages/BoasVindasPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 
-const NOMES_PERFIL = { ALUNO: 'Aluno', PROFESSOR: 'Professor', SECRETARIA: 'Secretaria' }
-
+/** Redireciona o usuário para a área do seu perfil. */
 function Inicio() {
-  const { usuario, logout } = useAuth()
-  return (
-    <main className="centered">
-      <div className="card">
-        <h1>Olá, {usuario.nome}!</h1>
-        <p className="muted">Perfil: {NOMES_PERFIL[usuario.perfil]}</p>
-        <button className="btn btn-secondary" onClick={logout}>Sair</button>
-      </div>
-    </main>
-  )
+  const { usuario } = useAuth()
+  return <Navigate to={PAGINA_INICIAL[usuario.perfil]} replace />
 }
+
+const somente = (perfil, elemento) => <ProtectedRoute perfis={[perfil]}>{elemento}</ProtectedRoute>
 
 export default function App() {
   return (
@@ -26,13 +22,17 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
-            path="/"
             element={
               <ProtectedRoute>
-                <Inicio />
+                <Layout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<Inicio />} />
+            <Route path="secretaria" element={somente('SECRETARIA', <BoasVindasPage />)} />
+            <Route path="aluno" element={somente('ALUNO', <BoasVindasPage />)} />
+            <Route path="professor" element={somente('PROFESSOR', <BoasVindasPage />)} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
