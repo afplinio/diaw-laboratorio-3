@@ -1,6 +1,7 @@
 package br.pucminas.matriculas.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import br.pucminas.matriculas.exception.RegraNegocioException;
@@ -22,6 +23,9 @@ public class Oferta {
     private String professorId;
     private int inscritos;
     private StatusOferta status = StatusOferta.ABERTA;
+    /** Controle de concorrência otimista: evita ultrapassar 60 inscritos em inscrições simultâneas. */
+    @Version
+    private Long versao;
 
     public Oferta() {
     }
@@ -110,5 +114,13 @@ public class Oferta {
 
     public void setStatus(StatusOferta status) {
         this.status = status;
+    }
+
+    public Long getVersao() {
+        return versao;
+    }
+
+    public void setVersao(Long versao) {
+        this.versao = versao;
     }
 }
