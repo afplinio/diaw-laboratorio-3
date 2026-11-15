@@ -11,6 +11,7 @@ import br.pucminas.matriculas.exception.RegraNegocioException;
 import br.pucminas.matriculas.model.Aluno;
 import br.pucminas.matriculas.model.Curriculo;
 import br.pucminas.matriculas.model.Matricula;
+import br.pucminas.matriculas.model.MotivoNotificacao;
 import br.pucminas.matriculas.model.Oferta;
 import br.pucminas.matriculas.model.StatusMatricula;
 import br.pucminas.matriculas.model.TipoMatricula;
@@ -60,7 +61,9 @@ public class MatriculaService {
 
         oferta.registrarInscricao();
         ofertaRepository.save(oferta);
-        return matriculaRepository.save(new Matricula(aluno.getId(), ofertaId, curriculo.getId(), tipo));
+        Matricula matricula = matriculaRepository.save(new Matricula(aluno.getId(), ofertaId, curriculo.getId(), tipo));
+        notificarCobranca(aluno, curriculo, MotivoNotificacao.INSCRICAO);
+        return matricula;
     }
 
     public Matricula cancelar(String alunoId, String matriculaId) {
@@ -75,13 +78,22 @@ public class MatriculaService {
             oferta.removerInscricao();
             ofertaRepository.save(oferta);
         });
-        return matriculaRepository.save(matricula);
+        matriculaRepository.save(matricula);
+        notificarCobranca(buscarAluno(alunoId), curriculo, MotivoNotificacao.CANCELAMENTO);
+        return matricula;
     }
 
     public List<Matricula> listarDoAluno(String alunoId) {
         return matriculaRepository.findByAlunoId(alunoId).stream()
                 .sorted(Comparator.comparing(Matricula::getDataMatricula).reversed())
                 .toList();
+    }
+
+    /** Após cada inscrição do aluno no semestre, o sistema de cobranças recebe as disciplinas a cobrar. */
+    private void notificarCobranca(Aluno aluno, Curriculo curriculo, MotivoNotificacao motivo) {
+        List<Matricula> ativas = matriculaRepository.findByAlunoIdAndCurriculoIdAndStatus(aluno.getId(),
+                curriculo.getId(), StatusMatricula.ATIVA);
+        sistemaCobrancas.notificar(aluno, curriculo, ativas, motivo);
     }
 
     private Aluno buscarAluno(String alunoId) {

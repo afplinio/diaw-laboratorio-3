@@ -18,7 +18,10 @@ public class NotificacaoCobranca {
     @Id
     private String id;
     private String alunoId;
+    private String alunoNome;
+    private String alunoMatricula;
     private String semestre;
+    private MotivoNotificacao motivo;
     private List<ItemCobranca> itens = new ArrayList<>();
     private BigDecimal valorTotal = BigDecimal.ZERO;
     private LocalDateTime dataNotificacao;
@@ -26,9 +29,12 @@ public class NotificacaoCobranca {
     public NotificacaoCobranca() {
     }
 
-    public NotificacaoCobranca(String alunoId, String semestre, List<ItemCobranca> itens) {
-        this.alunoId = alunoId;
+    public NotificacaoCobranca(Aluno aluno, String semestre, MotivoNotificacao motivo, List<ItemCobranca> itens) {
+        this.alunoId = aluno.getId();
+        this.alunoNome = aluno.getNome();
+        this.alunoMatricula = aluno.getMatricula();
         this.semestre = semestre;
+        this.motivo = motivo;
         this.itens = new ArrayList<>(itens);
         this.valorTotal = itens.stream().map(ItemCobranca::valor).reduce(BigDecimal.ZERO, BigDecimal::add);
         this.dataNotificacao = LocalDateTime.now();
@@ -48,6 +54,30 @@ public class NotificacaoCobranca {
 
     public void setAlunoId(String alunoId) {
         this.alunoId = alunoId;
+    }
+
+    public String getAlunoNome() {
+        return alunoNome;
+    }
+
+    public void setAlunoNome(String alunoNome) {
+        this.alunoNome = alunoNome;
+    }
+
+    public String getAlunoMatricula() {
+        return alunoMatricula;
+    }
+
+    public void setAlunoMatricula(String alunoMatricula) {
+        this.alunoMatricula = alunoMatricula;
+    }
+
+    public MotivoNotificacao getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(MotivoNotificacao motivo) {
+        this.motivo = motivo;
     }
 
     public String getSemestre() {

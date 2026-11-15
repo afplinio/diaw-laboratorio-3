@@ -5,6 +5,7 @@ import java.util.List;
 import br.pucminas.matriculas.model.Aluno;
 import br.pucminas.matriculas.model.Curriculo;
 import br.pucminas.matriculas.model.Matricula;
+import br.pucminas.matriculas.model.MotivoNotificacao;
 import br.pucminas.matriculas.model.NotificacaoCobranca;
 
 /**
@@ -13,5 +14,11 @@ import br.pucminas.matriculas.model.NotificacaoCobranca;
  */
 public interface SistemaCobrancas {
 
-    NotificacaoCobranca notificar(Aluno aluno, Curriculo curriculo, List<Matricula> matriculas);
+    /**
+     * Notifica as disciplinas atualmente ativas do aluno no semestre.
+     *
+     * @param matriculas matrículas ativas do aluno no currículo (pode ser vazia após cancelamentos)
+     */
+    NotificacaoCobranca notificar(Aluno aluno, Curriculo curriculo, List<Matricula> matriculas,
+            MotivoNotificacao motivo);
 }

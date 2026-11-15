@@ -2,8 +2,10 @@ package br.pucminas.matriculas.service;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -11,10 +13,12 @@ import br.pucminas.matriculas.exception.RecursoNaoEncontradoException;
 import br.pucminas.matriculas.exception.RegraNegocioException;
 import br.pucminas.matriculas.model.Curriculo;
 import br.pucminas.matriculas.model.Matricula;
+import br.pucminas.matriculas.model.MotivoNotificacao;
 import br.pucminas.matriculas.model.Oferta;
 import br.pucminas.matriculas.model.StatusCurriculo;
 import br.pucminas.matriculas.model.StatusMatricula;
 import br.pucminas.matriculas.model.StatusOferta;
+import br.pucminas.matriculas.repository.AlunoRepository;
 import br.pucminas.matriculas.repository.CurriculoRepository;
 import br.pucminas.matriculas.repository.DisciplinaRepository;
 import br.pucminas.matriculas.repository.MatriculaRepository;
@@ -30,15 +34,20 @@ public class CurriculoService {
     private final DisciplinaRepository disciplinaRepository;
     private final ProfessorRepository professorRepository;
     private final MatriculaRepository matriculaRepository;
+    private final AlunoRepository alunoRepository;
+    private final SistemaCobrancas sistemaCobrancas;
 
     public CurriculoService(CurriculoRepository curriculoRepository, OfertaRepository ofertaRepository,
             DisciplinaRepository disciplinaRepository, ProfessorRepository professorRepository,
-            MatriculaRepository matriculaRepository) {
+            MatriculaRepository matriculaRepository, AlunoRepository alunoRepository,
+            SistemaCobrancas sistemaCobrancas) {
         this.curriculoRepository = curriculoRepository;
         this.ofertaRepository = ofertaRepository;
         this.disciplinaRepository = disciplinaRepository;
         this.professorRepository = professorRepository;
         this.matriculaRepository = matriculaRepository;
+        this.alunoRepository = alunoRepository;
+        this.sistemaCobrancas = sistemaCobrancas;
     }
 
     public List<Curriculo> listar() {
@@ -129,6 +138,7 @@ public class CurriculoService {
     public Curriculo encerrarPeriodoMatriculas(String curriculoId) {
         Curriculo curriculo = buscar(curriculoId);
         curriculo.encerrarPeriodoMatriculas();
+        Set<String> alunosAfetados = new HashSet<>();
         for (Oferta oferta : ofertaRepository.findByCurriculoId(curriculoId)) {
             oferta.avaliarAtivacao();
             ofertaRepository.save(oferta);
@@ -137,9 +147,16 @@ public class CurriculoService {
                         StatusMatricula.ATIVA);
                 afetadas.forEach(Matricula::cancelarPorDisciplinaCancelada);
                 matriculaRepository.saveAll(afetadas);
+                afetadas.forEach(m -> alunosAfetados.add(m.getAlunoId()));
             }
         }
-        return curriculoRepository.save(curriculo);
+        Curriculo encerrado = curriculoRepository.save(curriculo);
+        // Alunos com disciplinas canceladas têm a cobrança do semestre recalculada
+        alunoRepository.findAllById(alunosAfetados).forEach(aluno -> sistemaCobrancas.notificar(aluno, encerrado,
+                matriculaRepository.findByAlunoIdAndCurriculoIdAndStatus(aluno.getId(), curriculoId,
+                        StatusMatricula.ATIVA),
+                MotivoNotificacao.ENCERRAMENTO_PERIODO));
+        return encerrado;
     }
 
     private static void exigirNaoEncerrado(Curriculo curriculo) {
